@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;700&family=JetBrains+Mono:wght@400;500&family=Metamorphous&family=Kurale&display=swap');
+@import url('https://fonts.cdnfonts.com/css/samarkan');
+@import "tailwindcss";
+
+@theme {
+  --color-onyx: #050505;
+  --color-rose-gold: #E2A99E;
+  --color-rose-gold-dark: #C1877D;
+  --color-rose-gold-muted: #2A1F1D;
+  --color-rose-gold-glow: rgba(226, 169, 158, 0.15);
+  
+  --font-display: "Outfit", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-sanskrit: "Samarkan", "Metamorphous", "Kurale", serif;
+}
+
+@layer base {
+  body {
+    @apply bg-onyx text-gray-400 font-sans selection:bg-rose-gold/30 selection:text-rose-gold overflow-x-hidden;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-white/[0.02] border border-white/10 backdrop-blur-2xl transition-all duration-500;
+  }
+  
+  .glass-panel:hover {
+    @apply border-rose-gold/20 bg-white/[0.04];
+  }
+
+  .rose-gold-glow {
+    text-shadow: 0 0 20px var(--color-rose-gold-glow);
+  }
+
+  .neon-line {
+    @apply relative;
+  }
+
+  .neon-line::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-rose-gold/50 to-transparent opacity-0 transition-opacity duration-500;
+  }
+
+  .neon-line:hover::after {
+    @apply opacity-100;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-20px) scale(1.05); }
+}
+
+.bg-atmosphere {
+  background: 
+    radial-gradient(circle at 0% 0%, #1a100f 0%, transparent 40%),
+    radial-gradient(circle at 100% 100%, #1a100f 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, #050505 0%, transparent 100%);
+}
+
+.floating-blob {
+  @apply absolute rounded-full blur-[120px] opacity-20 pointer-events-none;
+  animation: float 20s ease-in-out infinite;
+}
