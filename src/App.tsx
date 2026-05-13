@@ -39,6 +39,7 @@ export default function App() {
   const [mode, setMode] = useState<TransformMode>('encode');
   const [options, setOptions] = useState<CryptoOptions>({ shift: 3, key: 'PRAHELIKA' });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
   const [detectedType, setDetectedType] = useState<CipherType | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -65,6 +66,49 @@ export default function App() {
   useEffect(() => {
     handleTransform();
   }, [handleTransform]);
+
+  const handleCipherSelect = (c: typeof CIPHERS[0]) => {
+    setCipher(c.id);
+    setIsDropdownOpen(false);
+    setFocusedIndex(-1);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isDropdownOpen) {
+      if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setIsDropdownOpen(true);
+        setFocusedIndex(0);
+      }
+      return;
+    }
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setFocusedIndex(prev => (prev + 1) % CIPHERS.length);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setFocusedIndex(prev => (prev - 1 + CIPHERS.length) % CIPHERS.length);
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (focusedIndex >= 0) {
+          handleCipherSelect(CIPHERS[focusedIndex]);
+        }
+        break;
+      case 'Escape':
+        e.preventDefault();
+        setIsDropdownOpen(false);
+        setFocusedIndex(-1);
+        break;
+      case 'Tab':
+        setIsDropdownOpen(false);
+        setFocusedIndex(-1);
+        break;
+    }
+  };
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(output);
@@ -104,7 +148,7 @@ export default function App() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="lg:col-span-12 flex flex-wrap items-center justify-between gap-6 p-8 glass-panel rounded-[2.5rem]"
+          className={`lg:col-span-12 flex flex-wrap items-center justify-between gap-6 p-8 glass-panel rounded-[2.5rem] relative ${isDropdownOpen ? 'z-30' : 'z-20'}`}
         >
           <div className="flex items-center gap-6">
             {/* Mode Toggle */}
@@ -135,7 +179,8 @@ export default function App() {
             <div className="relative group">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-4 px-8 py-4 bg-black/60 border border-white/5 rounded-2xl text-rose-gold hover:border-rose-gold/30 transition-all min-w-[240px] shadow-sm active:scale-95"
+                onKeyDown={handleKeyDown}
+                className="flex items-center gap-4 px-8 py-4 bg-black/60 border border-white/5 rounded-2xl text-rose-gold hover:border-rose-gold/30 transition-all min-w-[240px] shadow-sm active:scale-95 outline-none focus-visible:ring-1 focus-visible:ring-rose-gold/50"
               >
                 <selectedCipher.icon size={20} className={cipher === CipherType.AUTO ? 'animate-pulse' : ''} />
                 <span className="flex-1 text-left font-display font-medium tracking-wide uppercase text-sm">{selectedCipher.label}</span>
@@ -153,15 +198,15 @@ export default function App() {
                       className="absolute top-full left-0 right-0 mt-4 bg-onyx/90 border border-white/10 rounded-2xl overflow-hidden z-50 shadow-[0_30px_60px_rgba(0,0,0,0.5)] backdrop-blur-3xl"
                     >
                       <div className="max-h-80 overflow-y-auto custom-scrollbar p-2">
-                        {CIPHERS.map((c) => (
+                        {CIPHERS.map((c, index) => (
                           <button
                             key={c.id}
-                            onClick={() => {
-                              setCipher(c.id);
-                              setIsDropdownOpen(false);
-                            }}
+                            onClick={() => handleCipherSelect(c)}
+                            onMouseEnter={() => setFocusedIndex(index)}
                             className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl text-left transition-all duration-300 ${
-                              cipher === c.id ? 'text-rose-gold bg-rose-gold/10' : 'text-rose-gold/40 hover:bg-white/5 hover:text-rose-gold'
+                              cipher === c.id 
+                                ? 'text-rose-gold bg-rose-gold/10' 
+                                : (focusedIndex === index ? 'text-rose-gold bg-white/5' : 'text-rose-gold/40 hover:text-rose-gold')
                             }`}
                           >
                             <c.icon size={18} />
